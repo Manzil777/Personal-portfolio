@@ -60,7 +60,7 @@ summary is hovered, show that summary instead. Fade/slide in on change (`aria-li
 - A couple are 3D wireframes with slow rotation + perspective projection.
 - Morph: particles break into a turbulent cloud, then settle into the next shape with spring easing
   (~600–900 ms), plus idle drift and a pointer repel radius.
-- Rest shape: portrait image sampled to dots (`/portrait.webp`); fallback: procedural neural-network graph.
+- Rest shape: portrait image sampled to dots (`/art/kakashi.png`); fallback: procedural neural-network graph.
 - Pause when tab hidden; honour `prefers-reduced-motion` (static dots, instant swaps).
 
 ## Theme

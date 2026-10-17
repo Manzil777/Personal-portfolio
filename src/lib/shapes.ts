@@ -8,9 +8,6 @@
  * Roughly 11% of the points of any shape are reserved for that shape's single
  * red "focal detail" (a flame, a cork, a flag, a caret …).
  */
-import type { Layer } from "./art-points";
-
-
 export type Pt = [number, number];
 
 type Prim =
@@ -30,9 +27,6 @@ export type Target = {
   y: number;
   a: boolean;
   s: number;
-  layer?: Layer;
-  spineS?: number;
-  hairDist?: number;
   weight?: number;
 };
 
