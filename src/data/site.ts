@@ -1,61 +1,137 @@
-export type IndexItem = { title: string; detail: string; summary: string; shape: string; href?: string };
-export type Project = IndexItem & { slug: string; year: string; stack: string[]; sections: { heading: string; text: string }[] };
-
-export const site = {
-  name: "Manzil Shrestha",
-  shortName: "Manzil",
-  role: "AI and Data Science student",
-  description: "Manzil Shrestha builds machine-learning systems, data products, and useful software from raw signals.",
-  location: "Bengaluru, India",
-  email: "shresthamanxil@gmail.com",
-  url: "http://localhost:3000",
-  socials: [
-    { label: "GitHub", href: "https://github.com/Manzil777" },
-    { label: "LinkedIn", href: "https://www.linkedin.com/in/manzil-shrestha-6b0607218/" },
-    { label: "X", href: "https://x.com/manzilshrestha9" },
-    { label: "Resume", href: "/resume.pdf" },
-  ],
+export type Row = {
+  title: string;
+  detail?: string;
+  /** Registry key, e.g. "project:zeal" */
+  shape: string;
+  /** Shown in the footer tagline while this row is hovered/focused. */
+  summary?: string;
+  /** External destination; when omitted the row renders as a button. */
+  href?: string;
 };
 
-export const projects: Project[] = [
+export type TabData = {
+  label: string;
+  rows: Row[];
+};
+
+export type Social = {
+  label: string;
+  href: string;
+  /** Registry key for the hover/click preview. */
+  shape: string;
+};
+
+export const site = {
+  name: "Manzil",
+  heading: "Manzil",
+  role: "AI and Data Science student",
+  location: "Bengaluru, India",
+  email: "shresthamanxil@gmail.com",
+  url: "https://manzil.vercel.app",
+  description:
+    "Manzil — AI and Data Science student. Builds things where machine learning meets engineering.",
+  bio: [
+    "I'm an AI & Data Science student who likes turning models into things that actually run. I work where machine learning meets engineering: pipelines, deployment, and the mechanics that keep a model alive after the notebook closes.",
+    "Third year at CMRIT. Outside class I write Python and tinker with MLOps tooling and small experiments.",
+  ],
+  tagline: "Will happily talk transformers, LSTM weather models or the next hackathon with anyone.",
+  hint: "Point at anything on the right to see it drawn in dots.",
+  themeStorageKey: "manzil-ui-theme",
+  restShape: "portrait",
+} as const;
+
+export const socials: Social[] = [
   {
-    slug: "proteinclassify", title: "ProteinClassify", detail: "PyTorch · ESM-2 · React", shape: "protein",
-    summary: "A bioinformatics platform that classifies protein sequences across 321 families.", year: "2025", stack: ["Flask", "PyTorch", "ESM-2", "React", "Tailwind CSS"],
-    sections: [
-      { heading: "Context", text: "ProteinClassify turns a sequence-analysis workflow into a single full-stack platform for classification and interpretation." },
-      { heading: "System", text: "It extracts transformer embeddings with Meta's ESM-2 model, uses a custom MLP classifier, and supports batch FASTA uploads." },
-      { heading: "Interpretation", text: "PCA-based embedding visualisation and real-time ESMFold structure prediction make model output easier to inspect." },
-    ],
+    label: "GitHub",
+    href: "https://github.com/Manzil777",
+    shape: "logo:github",
   },
   {
-    slug: "student-feedback-sentiment-analysis", title: "Student feedback sentiment analysis", detail: "Python · NLP · Scikit-learn", shape: "sentiment",
-    summary: "An end-to-end NLP pipeline for turning student feedback into usable sentiment trends.", year: "2025", stack: ["Python", "Scikit-learn", "NLTK", "Pandas", "Matplotlib"],
-    sections: [
-      { heading: "Context", text: "The project classifies more than 1,000 student-feedback entries as positive, neutral, or negative." },
-      { heading: "Method", text: "Tokenisation, stopword removal, lemmatisation, and TF-IDF vectorisation feed a Logistic Regression model evaluated with precision, recall, and F1-score." },
-      { heading: "Outcome", text: "The model achieved 88% classification accuracy, while automated SMTP collection and visualisation made trends easier to review." },
-    ],
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/in/manzil-shrestha-6b0607218/",
+    shape: "logo:linkedin",
   },
   {
-    slug: "soletrack", title: "SoleTrack", detail: "PHP · MySQL · JavaScript", shape: "inventory",
-    summary: "A lightweight retail POS and inventory system with SKU-level reporting.", year: "2025", stack: ["PHP", "MySQL/MariaDB", "JavaScript", "HTML", "CSS"],
-    sections: [
-      { heading: "Context", text: "SoleTrack was designed for a footwear retailer needing clearer stock and sales operations." },
-      { heading: "System", text: "The application tracks brand, size, and quantity by SKU with role-based Admin and Cashier access plus password hashing." },
-      { heading: "Outcome", text: "Daily sales reports and stock analytics support operational decisions while reducing manual inventory work." },
-    ],
+    label: "Résumé",
+    href: "/resume.pdf",
+    shape: "logo:resume",
   },
 ];
 
-export const experience: IndexItem[] = [
-  { title: "The FOOT's Nepal", detail: "Design and Requirements Analyst", shape: "flow", summary: "Translated retail inventory needs into functional requirements, system architecture, and a database schema." },
-  { title: "CMRIT project exhibition", detail: "Top 3 finish", shape: "trophy", summary: "SoleTrack was selected among the Top 3 departmental mini-project exhibition entries." },
-  { title: "RARE Club", detail: "Promotion head and social media manager", shape: "signal", summary: "Led promotional and social-media work as part of the CMRIT student club." },
-];
-
-export const life: IndexItem[] = [
-  { title: "Basketball", detail: "Sport", shape: "ball", summary: "Active basketball player." },
-  { title: "Football", detail: "Sport", shape: "ball", summary: "Active football player." },
-  { title: "Music", detail: "Listening", shape: "wave", summary: "A place to reset between builds." },
-  { title: "New places", detail: "Exploring", shape: "map", summary: "Always looking for the next route out of the familiar." },
+export const tabs: TabData[] = [
+  {
+    label: "Projects",
+    rows: [
+      {
+        title: "AI-FORGE",
+        detail: "Python · Digital Forensics",
+        shape: "project:ai-forge",
+        summary: "A multi-modal digital forensic investigation platform.",
+        href: "https://github.com/Manzil777?tab=repositories",
+      },
+      {
+        title: "ProteinClassify",
+        detail: "PyTorch · ESM-2",
+        shape: "project:proteinclassify",
+        summary: "Classifies protein sequences across 321 families with ESM-2 embeddings.",
+        href: "https://github.com/Manzil777?tab=repositories",
+      },
+      {
+        title: "Feedback sentiment",
+        detail: "Python · NLP",
+        shape: "project:sentiment",
+        summary: "An NLP pipeline that sorts 1,000+ feedback entries at 88% accuracy.",
+        href: "https://github.com/Manzil777?tab=repositories",
+      },
+      {
+        title: "SoleTrack",
+        detail: "PHP · MySQL",
+        shape: "project:soletrack",
+        summary: "A retail POS with SKU-level stock tracking and role-based access.",
+        href: "https://github.com/Manzil777?tab=repositories",
+      },
+      {
+        title: "Weather (LSTM)",
+        detail: "TensorFlow · Time series",
+        shape: "project:weather",
+        summary: "An LSTM that forecasts weather from historical time-series data.",
+        href: "https://github.com/Manzil777?tab=repositories",
+      },
+      {
+        title: "Human Following Robot",
+        detail: "Arduino · C/C++",
+        shape: "project:robot",
+        summary: "An IR and ultrasonic robot that tracks a person and dodges obstacles.",
+        href: "https://github.com/Manzil777?tab=repositories",
+      },
+    ],
+  },
+  {
+    label: "Education",
+    rows: [
+      {
+        title: "CMRIT",
+        detail: "AI & Data Science · 3rd year",
+        shape: "edu:cmrit",
+        summary: "B.E. in AI & Data Science at CMR Institute of Technology — CGPA 8.47, 2027.",
+      },
+      {
+        title: "St. Xavier",
+        detail: "Science · 12th",
+        shape: "edu:stxaviers",
+        summary: "Higher secondary science in Jawlakhel, Nepal — GPA 3.2/4.0, 2023.",
+      },
+    ],
+  },
+  {
+    label: "Life",
+    rows: [
+      { title: "Basketball", detail: "Sport", shape: "life:basketball" },
+      { title: "Football", detail: "Sport", shape: "life:football" },
+      { title: "Music", detail: "Listening", shape: "life:music" },
+      { title: "New places", detail: "Exploring", shape: "life:places" },
+      { title: "RARE Club", detail: "Leadership", shape: "life:club" },
+      { title: "Apticode", detail: "Hackathon", shape: "life:hackathon" },
+    ],
+  },
 ];
