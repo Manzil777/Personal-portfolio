@@ -274,7 +274,7 @@
     <!-- Left: 3D Canvas Box -->
     <div class="canvas-container" id="particle-canvas-box">
       <div class="hud">
-        <div class="hud-title">Target: <span id="current-shape-name" class="hud-live">Manzil (Default)</span></div>
+        <div class="hud-title">Target: <span id="current-shape-name" class="hud-live">Black Hole (Default)</span></div>
         <div>Particles: 4,800 · 3D Float32</div>
         <div>Easing: Hermite Arc + Spring Repulsion</div>
       </div>
@@ -322,6 +322,10 @@
       <div>
         <div class="section-title">Projects & System Shapes</div>
         <div class="shape-grid">
+          <div class="shape-card" tabindex="0" data-shape="blackhole">
+            <span class="title">Black Hole</span>
+            <span class="subtitle">Accretion Singularity</span>
+          </div>
           <div class="shape-card" tabindex="0" data-shape="proteinclassify">
             <span class="title">ProteinClassify</span>
             <span class="subtitle">DNA Helix & Magnifier (zeal)</span>
@@ -383,7 +387,7 @@
 
     // Initialize particle system
     const system = createParticleSystem(container, {
-      initialShape: "Manzil",
+      initialShape: "blackhole",
       canvasClass: "block h-full w-full"
     });
 
@@ -400,7 +404,7 @@
       });
       card.addEventListener("mouseleave", () => {
         setTimeout(() => {
-          updateLabel("Manzil (Default)");
+          updateLabel("Black Hole (Default)");
         }, 160);
       });
     });

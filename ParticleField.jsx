@@ -7,14 +7,14 @@ import { createParticleSystem } from "./particle-field.js";
  *
  * @param {Object} props
  * @param {string} [props.className] - Container CSS class names
- * @param {string} [props.initialShape] - Initial shape ("Manzil", "guitar", "cricket", etc.)
+ * @param {string} [props.initialShape] - Initial shape ("blackhole", "guitar", "cricket", etc.)
  * @param {number} [props.particleCount] - Explicit particle count override
  * @param {string} [props.inkColor] - Ink particle color (default: CSS var(--fg))
  * @param {string} [props.accentColor] - Accent particle color (default: CSS var(--accent))
  */
 export default function ParticleField({
   className = "relative h-72 w-full sm:h-96 lg:aspect-square lg:h-auto",
-  initialShape = "Manzil",
+  initialShape = "blackhole",
   particleCount,
   inkColor,
   accentColor

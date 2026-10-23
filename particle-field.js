@@ -1751,6 +1751,179 @@ export const ShapeLibrary = {
   "protein-classify"(n) {
     return this.proteinclassify(n);
   },
+
+  blackhole(n) {
+    const tilt = 0.45;
+    const cosTilt = Math.cos(tilt);
+    const sinTilt = Math.sin(tilt);
+    const rMinPow = Math.pow(0.24, -0.2);
+    const rMaxPow = Math.pow(0.86, -0.2);
+
+    return buildShape(
+      n,
+      "sway",
+      (addPoint) => {
+        // 1. Photon Sphere & Event Horizon Rim (strict r in [0.174, 0.22], high-density ring)
+        for (let i = 0; i < 90; i++) {
+          const r0 = randomRange(0.174, 0.22);
+          const theta0 = Math.random() * Math.PI * 2;
+          const z0 = randomRange(-0.05, 0.05);
+          const phase = Math.random() * Math.PI * 2;
+          const isAccent = Math.random() < 0.28;
+          const x = r0 * Math.cos(theta0);
+          const y = r0 * Math.sin(theta0);
+          const z = z0;
+          addPoint(x, y, z, isAccent, [3, r0, theta0, z0, phase]);
+        }
+
+        // 2. Tilted Accretion Disk (r in [0.24, 0.86], r^-1.2 falloff, 18% thermal accents)
+        for (let i = 0; i < 400; i++) {
+          const u = Math.random();
+          const r = Math.pow(rMinPow + u * (rMaxPow - rMinPow), -5);
+          const theta0 = Math.random() * Math.PI * 2;
+          const yThick = randomRange(-1, 1) * (0.012 + 0.032 * (r - 0.24));
+          const omega = 0.55 / Math.pow(r, 1.2);
+          const isAccent = Math.random() < 0.18;
+          const xRaw = r * Math.cos(theta0);
+          const zRaw = r * Math.sin(theta0);
+          const yRaw = yThick;
+          let x = xRaw;
+          let y = yRaw * cosTilt - zRaw * sinTilt;
+          let z = yRaw * sinTilt + zRaw * cosTilt;
+          const d = Math.hypot(x, y);
+          if (d < 0.172) {
+            const s = 0.172 / d;
+            x *= s;
+            y *= s;
+          }
+          addPoint(x, y, z, isAccent, [0, r, theta0, yThick, omega]);
+        }
+
+        // 3. Gravitational Lensing Halo Arcs (r in [0.36, 0.44], warped upper & lower)
+        for (let i = 0; i < 90; i++) {
+          const r0 = randomRange(0.36, 0.44);
+          const alpha0 = randomRange(0.18 * Math.PI, 0.82 * Math.PI);
+          const z0 = randomRange(-0.06, 0.06);
+          const sign = Math.random() < 0.5 ? -1 : 1;
+          const phase = Math.random() * Math.PI * 2;
+          const isAccent = Math.random() < 0.22;
+          let x = r0 * Math.cos(alpha0);
+          let y = sign * r0 * Math.sin(alpha0);
+          let z = z0;
+          const d = Math.hypot(x, y);
+          if (d < 0.172) {
+            const s = 0.172 / d;
+            x *= s;
+            y *= s;
+          }
+          addPoint(x, y, z, isAccent, [2, r0, alpha0, z0, sign, phase]);
+        }
+
+        // 4. Relativistic Polar Jets (collimated along disk polar axis, conical spread)
+        for (let i = 0; i < 150; i++) {
+          const dir = Math.random() < 0.5 ? -1 : 1;
+          const period = randomRange(1.3, 2.2);
+          const phase = Math.random();
+          const phi0 = Math.random() * Math.PI * 2;
+          const coreRatio = Math.pow(Math.random(), 0.65);
+          const isAccent = Math.random() < 0.62;
+          const prog = cyclicProgress(0, period, phase);
+          const yLocal = dir * (0.19 + prog * 0.70);
+          const coneRadius = (0.012 + 0.075 * prog) * (0.3 + 0.7 * coreRatio);
+          const phi = phi0 + dir * (3 * Math.PI * prog);
+          const xLocal = coneRadius * Math.cos(phi);
+          const zLocal = coneRadius * Math.sin(phi);
+          let x = xLocal;
+          let y = yLocal * cosTilt - zLocal * sinTilt;
+          let z = yLocal * sinTilt + zLocal * cosTilt;
+          const d = Math.hypot(x, y);
+          if (d < 0.172) {
+            const s = 0.172 / d;
+            x *= s;
+            y *= s;
+          }
+          addPoint(x, y, z, isAccent, [1, dir, period, phase, phi0, coreRatio]);
+        }
+      },
+      (param, x, y, z, time, target) => {
+        const type = param[0];
+        if (type === 0) {
+          // Accretion disk: differential Keplerian rotation with relativistic deflection
+          const r = param[1];
+          const theta = param[2] + param[4] * time;
+          const xRaw = r * Math.cos(theta);
+          const zRaw = r * Math.sin(theta);
+          const yRaw = param[3];
+          let curX = xRaw;
+          let curY = yRaw * cosTilt - zRaw * sinTilt;
+          let curZ = yRaw * sinTilt + zRaw * cosTilt;
+          const d = Math.hypot(curX, curY);
+          if (d < 0.172) {
+            const s = 0.172 / d;
+            curX *= s;
+            curY *= s;
+          }
+          setVec3(target, curX, curY, curZ);
+        } else if (type === 1) {
+          // Relativistic jet: cyclic outward ejection along polar axis
+          const dir = param[1];
+          const prog = cyclicProgress(time, param[2], param[3]);
+          const yLocal = dir * (0.19 + prog * 0.70);
+          const coneRadius = (0.012 + 0.075 * prog) * (0.3 + 0.7 * param[5]);
+          const phi = param[4] + dir * (3 * Math.PI * prog + 2.2 * time);
+          const xLocal = coneRadius * Math.cos(phi);
+          const zLocal = coneRadius * Math.sin(phi);
+          let curX = xLocal;
+          let curY = yLocal * cosTilt - zLocal * sinTilt;
+          let curZ = yLocal * sinTilt + zLocal * cosTilt;
+          const d = Math.hypot(curX, curY);
+          if (d < 0.172) {
+            const s = 0.172 / d;
+            curX *= s;
+            curY *= s;
+          }
+          setVec3(target, curX, curY, curZ);
+        } else if (type === 2) {
+          // Gravitational lensing halo: light distortion ripple
+          const shimmer = 1 + 0.02 * Math.sin(3.8 * time + param[5]);
+          const r = param[1] * shimmer;
+          const alpha = param[2] + 0.06 * Math.sin(1.6 * time + param[5]);
+          let curX = r * Math.cos(alpha);
+          let curY = param[4] * r * Math.sin(alpha);
+          let curZ = param[3] + 0.012 * Math.cos(2.8 * time + param[5]);
+          const d = Math.hypot(curX, curY);
+          if (d < 0.172) {
+            const s = 0.172 / d;
+            curX *= s;
+            curY *= s;
+          }
+          setVec3(target, curX, curY, curZ);
+        } else {
+          // Photon sphere: orbital shimmer and subtle breathing rim
+          const r = param[1] * (1 + 0.012 * Math.sin(4.5 * time + param[4]));
+          const theta = param[2] + 0.85 * time;
+          let curX = r * Math.cos(theta);
+          let curY = r * Math.sin(theta);
+          let curZ = param[3] + 0.008 * Math.cos(3 * time + param[4]);
+          const d = Math.hypot(curX, curY);
+          if (d < 0.172) {
+            const s = 0.172 / d;
+            curX *= s;
+            curY *= s;
+          }
+          setVec3(target, curX, curY, curZ);
+        }
+      }
+    );
+  },
+
+  singularity(n) {
+    return this.blackhole(n);
+  },
+
+  "black-hole"(n) {
+    return this.blackhole(n);
+  },
 };
 
 /**
@@ -2119,7 +2292,7 @@ export function createParticleSystem(container, options = {}) {
   };
 
   // Set default initial shape (e.g. user name or home shape)
-  let defaultKey = options.initialShape || "Manzil";
+  let defaultKey = options.initialShape || "blackhole";
   defaultShape = resolveShape(defaultKey);
   engine.morphTo(defaultShape, performance.now() / 1000);
   currentKey = defaultKey;
