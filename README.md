@@ -1,6 +1,6 @@
 # Interactive 3D Particle Animation Engine & Portfolio Replica
 
-A modular, high-performance 3D particle animation system extracted and reconstructed from [devaryan.com](https://devaryan.com/). It renders thousands of interactive particles with Hermite arc morphing, spring-damper cursor repulsion physics, and 3D procedural vector shapes at a locked 60 FPS.
+A modular, high-performance 3D particle animation personal website. It renders thousands of interactive particles with Hermite arc morphing, spring-damper cursor repulsion physics, and 3D procedural vector shapes at a locked 60 FPS.
 
 ---
 
@@ -49,82 +49,8 @@ The engine is built around high-performance WebGL-grade data structures using Ca
 - **3D Rotation**: Yaw continuous spin or sinusoidal sway $\text{yaw} = 0.55 \cdot \sin(\text{phase})$ + mouse lean pitch/yaw damping.
 - **Perspective Scale**: $\text{proj} = \frac{2.6}{2.6 + z}$.
 - **Spring-Damper Repulsion**: Acceleration $a = (F_{\text{target}} - x) \cdot 60 - 11 \cdot v$.
-- **16-Bucket Batched Rendering**: Particles are grouped into 8 depth bands $\times$ 2 color states (ink & accent). Draw calls are batched into single path rectangles (`ctx.rect(...)`), capping canvas draw calls $\le 16$ per frame for consistent 60 FPS.
 
----
-
-## 3. How to Use in Your Portfolio
-
-### Option A: Vanilla JavaScript / HTML
-Include `particle-field.js` as an ES module:
-
-```html
-<div id="particle-container" style="width: 500px; height: 500px;"></div>
-
-<!-- Add items with data-shape attributes -->
-<ul>
-  <li data-shape="guitar">Guitar</li>
-  <li data-shape="cricket">Cricket</li>
-  <li data-shape="badminton">Badminton</li>
-  <li data-shape="weekends">Weekends</li>
-  <li data-shape="goal">The Goal</li>
-</ul>
-
-<script type="module">
-  import { createParticleSystem } from "./particle-field.js";
-
-  const container = document.getElementById("particle-container");
-  const system = createParticleSystem(container, {
-    initialShape: "MyName", // Any name or shape key
-    canvasClass: "block h-full w-full"
-  });
-
-  // Programmatic morphing:
-  // system.morphTo("guitar");
-  // system.morphTo("Alex", true); // Sets new default shape
-</script>
-```
-
-### Option B: React / Next.js
-Import `ParticleField.jsx`:
-
-```jsx
-import ParticleField from "./ParticleField";
-
-export default function PortfolioHero() {
-  return (
-    <div className="flex flex-col lg:flex-row items-center gap-8">
-      {/* 3D Particle Canvas */}
-      <div className="w-full lg:w-1/2 aspect-square">
-        <ParticleField initialShape="Aryan" />
-      </div>
-
-      {/* Hoverable Navigation / Portfolio Items */}
-      <ul className="space-y-4">
-        <li data-shape="guitar" className="cursor-pointer hover:text-red-500">
-          Guitar — Music
-        </li>
-        <li data-shape="cricket" className="cursor-pointer hover:text-red-500">
-          Cricket — Sport
-        </li>
-        <li data-shape="badminton" className="cursor-pointer hover:text-red-500">
-          Badminton — Sport
-        </li>
-        <li data-shape="weekends" className="cursor-pointer hover:text-red-500">
-          Weekends — Code & Treks
-        </li>
-        <li data-shape="goal" className="cursor-pointer hover:text-red-500">
-          The Goal — Safe Vault
-        </li>
-      </ul>
-    </div>
-  );
-}
-```
-
----
-
-## 4. Built-in Shape Library
+## 3. Built-in Shape Library
 
 The following shapes are bundled in `ShapeLibrary`:
 
@@ -145,7 +71,7 @@ The following shapes are bundled in `ShapeLibrary`:
 
 ---
 
-## 5. Adding New Custom 3D Shapes
+## 4. Adding New Custom 3D Shapes
 
 You can create new procedural shapes using the exported sampling primitives in `particle-field.js`:
 
