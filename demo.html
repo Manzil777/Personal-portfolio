@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Standalone 3D Particle Animation Engine Demo</title>
+  <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="images/favicon.ico" sizes="48x48">
+  <style>
+    :root {
+      --bg: #faf9f6;
+      --fg: #141413;
+      --muted: #73726c;
+      --border: #e6e4dc;
+      --surface: #ffffff;
+      --accent: #d23a22;
+      --card-bg: rgba(255, 255, 255, 0.7);
+    }
+
+    html.dark {
+      --bg: #141413;
+      --fg: #faf9f6;
+      --muted: #a1a09a;
+      --border: #2a2a28;
+      --surface: #1c1c1a;
+      --accent: #e54d2e;
+      --card-bg: rgba(28, 28, 26, 0.7);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Geist", Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--fg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 2rem;
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(8px);
+      background-color: var(--card-bg);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .logo-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.2rem 0.5rem;
+      border-radius: 9999px;
+      background-color: rgba(229, 77, 46, 0.15);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .theme-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--fg);
+      padding: 0.5rem 0.85rem;
+      border-radius: 9999px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s;
+    }
+
+    .theme-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem;
+      gap: 3rem;
+    }
+
+    @media (min-width: 1024px) {
+      main {
+        grid-template-columns: 1.1fr 1fr;
+        align-items: center;
+      }
+    }
+
+    .canvas-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      max-width: 520px;
+      margin: 0 auto;
+      border-radius: 1.5rem;
+      border: 1px solid var(--border);
+      background: radial-gradient(circle at center, rgba(229, 77, 46, 0.03) 0%, transparent 70%);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hud {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      font-size: 0.75rem;
+      color: var(--muted);
+      line-height: 1.4;
+      pointer-events: none;
+    }
+
+    .hud-title {
+      font-weight: 600;
+      color: var(--fg);
+    }
+
+    .hud-live {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .hud-footer {
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+      font-size: 0.75rem;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .section-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+    }
+
+    .shape-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 0.6rem;
+    }
+
+    .shape-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      user-select: none;
+    }
+
+    .shape-card:hover, .shape-card:focus-visible {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      outline: none;
+    }
+
+    .shape-card .title {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .shape-card .subtitle {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .custom-name-box {
+      margin-top: 0.5rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .custom-name-box input {
+      flex: 1;
+      padding: 0.65rem 1rem;
+      border-radius: 0.6rem;
+      border: 1px solid var(--border);
+      background-color: var(--surface);
+      color: var(--fg);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .custom-name-box input:focus {
+      border-color: var(--accent);
+    }
+
+    .custom-name-box button {
+      padding: 0.65rem 1.25rem;
+      border-radius: 0.6rem;
+      background-color: var(--accent);
+      color: #fff;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: opacity 0.2s;
+    }
+
+    .custom-name-box button:hover {
+      opacity: 0.9;
+    }
+
+    .instructions {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 0.75rem;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .instructions strong {
+      color: var(--fg);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo-group">
+      <h2>Particle Animation System</h2>
+      <span class="badge">Standalone</span>
+    </div>
+    <button class="theme-btn" id="theme-toggle">
+      <span id="theme-icon">☀️</span> Light / Dark
+    </button>
+  </header>
+
+  <main>
+    <!-- Left: 3D Canvas Box -->
+    <div class="canvas-container" id="particle-canvas-box">
+      <div class="hud">
+        <div class="hud-title">Target: <span id="current-shape-name" class="hud-live">Manzil (Default)</span></div>
+        <div>Particles: 4,800 · 3D Float32</div>
+        <div>Easing: Hermite Arc + Spring Repulsion</div>
+      </div>
+      <div class="hud-footer">
+        <div>Hover cursor to repel dots</div>
+      </div>
+    </div>
+
+    <!-- Right: Interactive Controls and Shape List -->
+    <div class="controls-panel">
+      <div>
+        <div class="section-title">Life & Interests (Procedural 3D Vector Shapes)</div>
+        <div class="shape-grid">
+          <div class="shape-card" tabindex="0" data-shape="guitar">
+            <span class="title">Guitar</span>
+            <span class="subtitle">Acoustic Body & Strings</span>
+          </div>
+          <div class="shape-card" tabindex="0" data-shape="cricket">
+            <span class="title">Cricket</span>
+            <span class="subtitle">Bat, Stumps & Ball</span>
+          </div>
+          <div class="shape-card" tabindex="0" data-shape="badminton">
+            <span class="title">Badminton</span>
+            <span class="subtitle">Racket & Shuttlecock</span>
+          </div>
+          <div class="shape-card" tabindex="0" data-shape="weekends">
+            <span class="title">Weekends</span>
+            <span class="subtitle">Laptop & Mountains</span>
+          </div>
+          <div class="shape-card" tabindex="0" data-shape="goal">
+            <span class="title">The Goal</span>
+            <span class="subtitle">3D Vault Safe Door</span>
+          </div>
+          <div class="shape-card" tabindex="0" data-shape="bonfire">
+            <span class="title">Bonfire</span>
+            <span class="subtitle">Logs & Flickering Flames</span>
+          </div>
+          <div class="shape-card" tabindex="0" data-shape="the-foots-nepal">
+            <span class="title">The FOOT's Nepal</span>
+            <span class="subtitle">Walking Sneaker</span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">Projects & System Shapes</div>
+        <div class="shape-grid">
+          <div class="shape-card" tabindex="0" data-shape="proteinclassify">
+            <span class="title">ProteinClassify</span>
+            <span class="subtitle">DNA Helix & Magnifier (zeal)</span>
+          </div>
+          <div class="shape-card" tabindex="0" data-shape="zuno">
+            <span class="title">Zuno</span>
+            <span class="subtitle">Browser Window & Tabs</span>
+          </div>
+          <div class="shape-card" tabindex="0" data-shape="sentiment-analysis">
+            <span class="title">Sentiment Analysis</span>
+            <span class="subtitle">AI Deck (SlideGen)</span>
+          </div>
+          <div class="shape-card" tabindex="0" data-shape="soletrack">
+            <span class="title">SoleTrack</span>
+            <span class="subtitle">Disk Sunburst (duaarr)</span>
+          </div>
+          <div class="shape-card" tabindex="0" data-shape="resume">
+            <span class="title">Resume</span>
+            <span class="subtitle">Folded Document Page</span>
+          </div>
+          <div class="shape-card" tabindex="0" data-shape="github">
+            <span class="title">GitHub</span>
+            <span class="subtitle">Octocat Vector Logo</span>
+          </div>
+          <div class="shape-card" tabindex="0" data-shape="linkedin">
+            <span class="title">LinkedIn</span>
+            <span class="subtitle">Vector In Logo</span>
+          </div>
+          <div class="shape-card" tabindex="0" data-shape="x">
+            <span class="title">X / Twitter</span>
+            <span class="subtitle">Cross Vector Logo</span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">Procedural Text Rasterizer (Any Name or String)</div>
+        <div class="custom-name-box">
+          <input type="text" id="name-input" placeholder="Enter your name (e.g. Alex, Portfolio, Code)..." value="Manzil" />
+          <button id="morph-name-btn">Morph Text</button>
+        </div>
+      </div>
+
+      <div class="instructions">
+        <strong>Interaction Guide:</strong> Hover any card above to trigger immediate 3D dot morphing with Hermite arc trajectory and organic Fisher-Yates dispersal. Move your cursor over the canvas to feel the spring-damper repulsion physics. Switch themes to see dynamic particle ink reassembly!
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { createParticleSystem, sampleText } from "./particle-field.js";
+
+    const container = document.getElementById("particle-canvas-box");
+    const shapeLabel = document.getElementById("current-shape-name");
+    const themeBtn = document.getElementById("theme-toggle");
+    const themeIcon = document.getElementById("theme-icon");
+    const nameInput = document.getElementById("name-input");
+    const morphNameBtn = document.getElementById("morph-name-btn");
+
+    // Initialize particle system
+    const system = createParticleSystem(container, {
+      initialShape: "Manzil",
+      canvasClass: "block h-full w-full"
+    });
+
+    // Update HUD text on shape change
+    const updateLabel = (text) => {
+      shapeLabel.textContent = text;
+    };
+
+    // Listen to pointerover on shape cards to update HUD
+    document.querySelectorAll("[data-shape]").forEach((card) => {
+      card.addEventListener("mouseenter", () => {
+        const title = card.querySelector(".title")?.textContent || card.dataset.shape;
+        updateLabel(title);
+      });
+      card.addEventListener("mouseleave", () => {
+        setTimeout(() => {
+          updateLabel("Manzil (Default)");
+        }, 160);
+      });
+    });
+
+    // Morph custom name button
+    morphNameBtn.addEventListener("click", () => {
+      const text = nameInput.value.trim() || "Portfolio";
+      system.morphTo(text, true);
+      updateLabel(`"${text}" (Custom Default)`);
+    });
+
+    nameInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        morphNameBtn.click();
+      }
+    });
+
+    // Theme toggle
+    themeBtn.addEventListener("click", () => {
+      const isDark = document.documentElement.classList.toggle("dark");
+      themeIcon.textContent = isDark ? "☀️" : "🌙";
+    });
+  </script>
+</body>
+</html>
