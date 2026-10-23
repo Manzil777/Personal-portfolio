@@ -1562,9 +1562,12 @@ export function createParticleSystem(container, options = {}) {
     const parts = key.split(":");
     const name = parts.length > 1 ? parts[1] : parts[0];
 
+    const normalized = name.replace(/[-_]/g, "");
     let shape = null;
-    if (ShapeLibrary[name]) {
-      shape = ShapeLibrary[name](engine.n);
+    if (typeof ShapeLibrary[name] === "function") {
+      shape = ShapeLibrary[name].call(ShapeLibrary, engine.n);
+    } else if (typeof ShapeLibrary[normalized] === "function") {
+      shape = ShapeLibrary[normalized].call(ShapeLibrary, engine.n);
     } else {
       shape = sampleText(engine.n, name);
     }

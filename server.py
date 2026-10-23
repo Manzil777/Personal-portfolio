@@ -29,6 +29,12 @@ class FastPortfolioHandler(SimpleHTTPRequestHandler):
     def translate_path(self, path):
         parsed = urllib.parse.urlparse(path)
         clean = parsed.path.lstrip('/')
+        if clean.startswith('Personal-portfolio/'):
+            clean = clean[len('Personal-portfolio/'):]
+        elif clean == 'Personal-portfolio':
+            clean = ''
+        if clean == '' or clean.endswith('/'):
+            clean = os.path.join(clean, 'index.html')
         target = os.path.join(ROOT_DIR, clean)
         if not os.path.exists(target):
             if clean.startswith('_next/static/chunks/') and clean.endswith('.css'):
@@ -94,18 +100,11 @@ class FastPortfolioHandler(SimpleHTTPRequestHandler):
                     self.send_error(500, f"Error reading resume: {e}")
                     return
 
-        if clean_path in ('', '/', '/index.html'):
+        if clean_path in ('', '/', '/index.html', '/Personal-portfolio', '/Personal-portfolio/', '/Personal-portfolio/index.html'):
             try:
-                with open(os.path.join(ROOT_DIR, 'index.html'), 'r', encoding='utf-8') as f:
-                    content = f.read()
+                with open(os.path.join(ROOT_DIR, 'index.html'), 'rb') as f:
+                    encoded = f.read()
 
-                # Rewrite paths to match Next.js expectations
-                content = content.replace('href="css/', 'href="/_next/static/css/')
-                content = content.replace('href="fonts/', 'href="/_next/static/media/')
-                content = content.replace('src="js/', 'src="/_next/static/chunks/')
-                content = content.replace('href="js/', 'href="/_next/static/chunks/')
-
-                encoded = content.encode('utf-8')
                 self.send_response(200)
                 self.send_header('Content-Type', 'text/html; charset=utf-8')
                 self.send_header('Content-Length', str(len(encoded)))
