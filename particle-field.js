@@ -226,398 +226,940 @@ export const ShapeLibrary = {
     const lower = { y: 0.45, r: 0.36 };
     const upper = { y: 0.05, r: 0.27 };
     const rot = (p) => rotateZ([0.85 * p[0], (p[1] - 0.15) * 0.85, p[2]], 0.6);
-    const soundHoleCenter = rot([0, 0.2, -0.07]);
     const rotVec = rotateZ([1, 0, 0], 0.6);
+    const soundHoleCenter = rot([0, 0.2, -0.07]);
     const soundHoleAngle = Math.atan2(-rotVec[1], -rotVec[0]);
-
     const isInsideBody = (x, y) =>
       Math.hypot(x, y - lower.y) < lower.r || Math.hypot(x, y - upper.y) < upper.r;
 
-    return buildShape(n, "sway", (addPoint) => {
-      // Soundboard contour
-      for (let i = 0; i < 48; i++) {
-        const a = Math.random() * Math.PI * 2;
-        const x = Math.cos(a) * lower.r;
-        const y = lower.y + Math.sin(a) * lower.r;
-        for (const z of [-0.07, 0.07]) {
-          const [rx, ry, rz] = rot([x + randomRange(-0.01, 0.01), y + randomRange(-0.01, 0.01), z]);
-          addPoint(rx, ry, rz);
+    return buildShape(
+      n,
+      "sway",
+      (addPoint) => {
+        const addRotPoint = (p, isAccent = false, param = null) => {
+          const [rx, ry, rz] = rot(p);
+          addPoint(rx, ry, rz, isAccent, param);
+        };
+        const rotPointDirect = (x, y, z, isAccent = false, param = null) =>
+          addRotPoint([x, y, z], isAccent, param);
+
+        for (let t = 0; t < 90; t++) {
+          const pickLower = Math.random() < 0.6;
+          const c1 = pickLower ? lower : upper;
+          const c2 = pickLower ? upper : lower;
+          const a = Math.random() * Math.PI * 2;
+          const x = Math.cos(a) * c1.r;
+          const y = c1.y + Math.sin(a) * c1.r;
+          if (Math.hypot(x, y - c2.y) >= c2.r) {
+            addRotPoint([x, y, -0.06]);
+            addRotPoint([x, y, 0.06]);
+            if (t % 3 === 0) addRotPoint([x, y, randomRange(-0.06, 0.06)]);
+          }
+        }
+
+        for (let t = 0; t < 40; t++) {
+          const x = randomRange(-0.36, 0.36);
+          const y = randomRange(-0.22, 0.81);
+          if (isInsideBody(x, y) && Math.hypot(x, y - 0.2) > 0.16) {
+            addRotPoint([x, y, -0.06]);
+          }
+        }
+
+        sampleArc(rotPointDirect, [0, 0.2, -0.065], 0.13, 16, [1, 0, 0], [0, 1, 0], false, 0.004);
+        sampleArc(rotPointDirect, [0, 0.2, -0.065], 0.152, 16, [1, 0, 0], [0, 1, 0], false, 0.004);
+        sampleArc(rotPointDirect, [0, 0.2, -0.07], 0.1, 26, [1, 0, 0], [0, 1, 0], true, 0.006);
+
+        samplePolyline(
+          rotPointDirect,
+          [
+            [0.09, 0.27, -0.065],
+            [0.21, 0.31, -0.065],
+            [0.25, 0.41, -0.065],
+            [0.17, 0.48, -0.065],
+            [0.08, 0.42, -0.065]
+          ],
+          60,
+          0.004,
+          false,
+          true
+        );
+
+        samplePolyline(
+          rotPointDirect,
+          [
+            [-0.12, 0.56, -0.07],
+            [0.12, 0.56, -0.07],
+            [0.12, 0.61, -0.07],
+            [-0.12, 0.61, -0.07]
+          ],
+          70,
+          0.004,
+          false,
+          true
+        );
+
+        for (let t = 0; t < 6; t++) addRotPoint([-0.05 + 0.02 * t, 0.585, -0.075]);
+
+        for (const t of [-0.045, 0.045]) {
+          sampleLine(rotPointDirect, [t, -0.21, -0.06], [t, -0.92, -0.06], 30, 0.005);
+        }
+
+        for (let t = 0; t < 10; t++) {
+          sampleLine(
+            rotPointDirect,
+            [-0.045, -0.25 - 0.068 * t, -0.06],
+            [0.045, -0.25 - 0.068 * t, -0.06],
+            3,
+            0.003
+          );
+        }
+
+        for (const t of [2, 4, 6, 8]) {
+          addRotPoint([0, -0.25 - (t + 0.5) * 0.068, -0.062]);
+        }
+
+        samplePolyline(
+          rotPointDirect,
+          [
+            [-0.05, -0.92, -0.06],
+            [-0.075, -1.14, -0.06],
+            [0.075, -1.14, -0.06],
+            [0.05, -0.92, -0.06]
+          ],
+          60,
+          0.005,
+          false,
+          true
+        );
+
+        for (const t of [-1, 1]) {
+          for (let e = 0; e < 3; e++) {
+            const r = -0.97 - 0.06 * e;
+            sampleLine(rotPointDirect, [0.07 * t, r, -0.06], [0.11 * t, r, -0.06], 2, 0.003);
+            sampleArc(rotPointDirect, [0.125 * t, r, -0.06], 0.018, 4, [1, 0, 0], [0, 1, 0], false, 0.003);
+          }
+        }
+
+        for (let t = 0; t < 6; t++) {
+          for (let e = 0; e < 10; e++) {
+            const frac = Math.random();
+            addRotPoint(
+              [-0.05 + 0.02 * t + (-0.035 + 0.014 * t - (-0.05 + 0.02 * t)) * frac, 0.585 - 1.505 * frac, -0.075],
+              false,
+              [0, frac, t]
+            );
+          }
+        }
+
+        for (let e = 0; e < 3; e++) {
+          for (let r = 0; r < 16; r++) {
+            addPoint(soundHoleCenter[0], soundHoleCenter[1], soundHoleCenter[2], true, [
+              1,
+              soundHoleAngle + randomRange(-0.6, 0.6),
+              e / 3
+            ]);
+          }
+        }
+      },
+      (param, x, y, z, time, target) => {
+        if (param[0] === 0) {
+          const n = 0.011 * Math.sin(Math.PI * param[1]) * Math.sin(38 * time + 1.7 * param[2]);
+          setVec3(target, x + rotVec[0] * n, y + rotVec[1] * n, z);
+        } else {
+          const prog = cyclicProgress(time, 1.8, param[2]);
+          const radius = 0.3 + 0.5 * prog;
+          setVec3(
+            target,
+            soundHoleCenter[0] + Math.cos(param[1]) * radius,
+            soundHoleCenter[1] + Math.sin(param[1]) * radius,
+            soundHoleCenter[2] - 0.1 + prog * prog * 0.9
+          );
         }
       }
-      for (let i = 0; i < 36; i++) {
-        const a = Math.random() * Math.PI * 2;
-        const x = Math.cos(a) * upper.r;
-        const y = upper.y + Math.sin(a) * upper.r;
-        for (const z of [-0.07, 0.07]) {
-          const [rx, ry, rz] = rot([x + randomRange(-0.01, 0.01), y + randomRange(-0.01, 0.01), z]);
-          addPoint(rx, ry, rz);
-        }
-      }
-
-      // Interior soundboard face
-      for (let i = 0; i < 110; i++) {
-        const x = randomRange(-0.4, 0.4);
-        const y = randomRange(-0.25, 0.85);
-        if (isInsideBody(x, y) && Math.hypot(x, y - 0.2) > 0.11) {
-          const [rx, ry, rz] = rot([x, y, -0.07 + randomRange(-0.006, 0.006)]);
-          addPoint(rx, ry, rz);
-        }
-      }
-
-      // Sound hole ring
-      sampleArc(
-        addPoint,
-        soundHoleCenter,
-        0.088,
-        50,
-        [Math.cos(soundHoleAngle), Math.sin(soundHoleAngle), 0],
-        [-Math.sin(soundHoleAngle), Math.cos(soundHoleAngle), 0],
-        false,
-        0.006
-      );
-
-      // Neck, fretboard, and headstock
-      samplePolyline(
-        addPoint,
-        [
-          rot([-0.05, 0.05, -0.07]),
-          rot([-0.045, -0.72, -0.07]),
-          rot([0.045, -0.72, -0.07]),
-          rot([0.05, 0.05, -0.07])
-        ],
-        65,
-        0.008
-      );
-
-      // Frets
-      for (let f = 0; f < 10; f++) {
-        const y = -0.02 - 0.065 * f;
-        sampleLine(addPoint, rot([-0.048, y, -0.07]), rot([0.048, y, -0.07]), 12, 0.006);
-      }
-
-      // Bridge and saddle
-      samplePolyline(
-        addPoint,
-        [
-          rot([-0.12, 0.48, -0.07]),
-          rot([0.12, 0.48, -0.07]),
-          rot([0.12, 0.53, -0.07]),
-          rot([-0.12, 0.53, -0.07])
-        ],
-        55,
-        0.006,
-        false,
-        true
-      );
-
-      // 6 Strings with vibration motion hook
-      for (let s = 0; s < 6; s++) {
-        const x0 = -0.03 + 0.012 * s;
-        const x1 = -0.038 + 0.015 * s;
-        const p1 = rot([x1, 0.48, -0.075]);
-        const p2 = rot([x0, -0.72, -0.075]);
-        for (let pt = 0; pt < 26; pt++) {
-          const t = pt / 25;
-          const px = p1[0] + (p2[0] - p1[0]) * t;
-          const py = p1[1] + (p2[1] - p1[1]) * t;
-          const pz = p1[2] + (p2[2] - p1[2]) * t;
-          addPoint(px, py, pz, s === 0 || s === 5, { stringIndex: s, progress: t });
-        }
-      }
-    }, (param, x, y, z, time, target) => {
-      // String vibration animation
-      const amp = 0.025 * Math.sin(Math.PI * param.progress) * Math.sin(time * 30 + param.stringIndex * 1.5);
-      target[0] = x + rotVec[0] * amp;
-      target[1] = y + rotVec[1] * amp;
-      target[2] = z;
-    });
+    );
   },
 
   cricket(n) {
-    const batBlade = [
-      [-0.14, 0.55, 0],
-      [0.14, 0.55, 0],
-      [0.12, -0.35, 0],
-      [-0.12, -0.35, 0]
-    ];
-    const ballFlightStart = [0.95, -0.3, 1.5];
-    const ballFlightMid = [0.3, 0.59, 0.3];
-    const ballFlightEnd = [-0.3, 0.26, -0.14];
-    const ballFlightApex = [-1.4, -1.3, 2.2];
+    const pStart = [0.95, -0.3, 1.5];
+    const pBounce = [0.3, 0.59, 0.3];
+    const pBat = [-0.3, 0.26, -0.14];
+    const pBoundary = [-1.4, -1.3, 2.2];
 
     const ballTrajectory = (t) => {
-      if (t < 0.45) return arcInterpolate(ballFlightStart, ballFlightMid, t / 0.45, 0.12);
-      if (t < 0.68) return arcInterpolate(ballFlightMid, ballFlightEnd, (t - 0.45) / 0.23, 0.12);
-      return arcInterpolate(ballFlightEnd, ballFlightApex, (t - 0.68) / 0.32, 0.3);
+      if (t < 0.45) return arcInterpolate(pStart, pBounce, t / 0.45, 0.12);
+      if (t < 0.68) return arcInterpolate(pBounce, pBat, (t - 0.45) / 0.23, 0.12);
+      return arcInterpolate(pBat, pBoundary, (t - 0.68) / 0.32, 0.3);
     };
 
-    return buildShape(n, "sway", (addPoint) => {
-      // Cricket bat blade
-      samplePolyline(addPoint, batBlade, 80, 0.008, false, true);
-      samplePolygonInterior(addPoint, batBlade, 120, 0);
+    return buildShape(
+      n,
+      "sway",
+      (addPoint) => {
+        const addRotBatPoint = (x, y, z, isAccent = false) => {
+          const [rx, ry, rz] = rotateZ([x, y, z], 0.45);
+          addPoint(rx - 0.3, ry, rz, isAccent);
+        };
 
-      // Bat handle
-      sampleLine(addPoint, [0, -0.35, 0], [0, -0.75, 0], 45, 0.008);
-      sampleLine(addPoint, [-0.02, -0.35, 0], [-0.02, -0.75, 0], 40, 0.008);
-      sampleLine(addPoint, [0.02, -0.35, 0], [0.02, -0.75, 0], 40, 0.008);
+        const batContour = [
+          [-0.13, -0.05, 0],
+          [0.13, -0.05, 0],
+          [0.13, 0.66, 0],
+          [0.09, 0.74, 0],
+          [-0.09, 0.74, 0],
+          [-0.13, 0.66, 0]
+        ];
 
-      // Handle grip wrapping
-      for (let g = 0; g < 12; g++) {
-        const y = -0.38 - 0.03 * g;
-        sampleLine(addPoint, [-0.025, y, 0], [0.025, y, 0], 8, 0.005);
+        for (const z of [-0.04, 0.04]) {
+          samplePolyline(addRotBatPoint, batContour.map(([x, y]) => [x, y, z]), 60, 0.006, false, true);
+        }
+
+        for (let t = 0; t < 26; t++) {
+          addRotBatPoint(randomRange(-0.12, 0.12), randomRange(-0.03, 0.72), -0.04);
+        }
+
+        sampleLine(addRotBatPoint, [0, 0, 0.06], [0, 0.62, 0.07], 12, 0.02);
+        for (const x of [-0.035, 0.035]) {
+          sampleLine(addRotBatPoint, [x, -0.05, 0], [x, -0.55, 0], 18, 0.005);
+        }
+
+        for (let t = 0; t < 8; t++) {
+          sampleLine(
+            addRotBatPoint,
+            [-0.035, -0.1 - 0.055 * t, 0],
+            [0.035, -0.07 - 0.055 * t, 0],
+            3,
+            0.004
+          );
+        }
+
+        // Stumps
+        for (const sx of [0.3, 0.42, 0.54]) {
+          for (let r = 0; r < 26; r++) {
+            const a = Math.random() * Math.PI * 2;
+            addPoint(sx + 0.016 * Math.cos(a), randomRange(-0.3, 0.66), 0.45 + 0.016 * Math.sin(a));
+          }
+        }
+
+        // Bails
+        sampleLine(addPoint, [0.3, -0.32, 0.45], [0.42, -0.32, 0.45], 6, 0.008);
+        sampleLine(addPoint, [0.42, -0.32, 0.45], [0.54, -0.32, 0.45], 6, 0.008);
+
+        // Pitch crease lines
+        sampleLine(addPoint, [-0.9, 0.66, 0.45], [0.95, 0.66, 0.45], 26, 0.004);
+        sampleLine(addPoint, [-0.95, 0.66, -0.3], [0.9, 0.66, -0.3], 26, 0.004);
+        for (const cx of [-0.75, 0.75]) {
+          sampleLine(addPoint, [cx, 0.66, -0.6], [cx, 0.66, 0.45], 10, 0.004);
+        }
+
+        // Cricket ball particles
+        const initBall = ballTrajectory(0);
+        for (let e = 0; e < 60; e++) {
+          const a = Math.random() * Math.PI * 2;
+          const polar = Math.acos(randomRange(-1, 1));
+          const offset = [
+            Math.sin(polar) * Math.cos(a) * 0.07,
+            0.07 * Math.cos(polar),
+            Math.sin(polar) * Math.sin(a) * 0.07
+          ];
+          addPoint(initBall[0] + offset[0], initBall[1] + offset[1], initBall[2] + offset[2], true, [0, ...offset]);
+        }
+
+        // Wake / trailing particles
+        for (let e = 0; e < 14; e++) {
+          addPoint(initBall[0], initBall[1], initBall[2], true, [
+            1,
+            randomRange(0.01, 0.07),
+            randomRange(-0.02, 0.02),
+            randomRange(-0.02, 0.02)
+          ]);
+        }
+      },
+      (param, x, y, z, time, target) => {
+        const prog = cyclicProgress(time, 2.6);
+        if (param[0] === 0) {
+          const ballPos = ballTrajectory(prog);
+          const spin = 9 * time;
+          const rotatedY = param[2] * Math.cos(spin) - param[3] * Math.sin(spin);
+          const rotatedZ = param[2] * Math.sin(spin) + param[3] * Math.cos(spin);
+          setVec3(target, ballPos[0] + param[1], ballPos[1] + rotatedY, ballPos[2] + rotatedZ);
+        } else {
+          const delayedPos = ballTrajectory(Math.max(0, prog - param[1]));
+          setVec3(target, delayedPos[0] + param[2], delayedPos[1] + param[3], delayedPos[2] + 0.03);
+        }
       }
-
-      // Bat spine / curve contour
-      sampleLine(addPoint, [0, 0.55, 0.05], [0, -0.35, 0.05], 40, 0.008);
-
-      // 3 Wickets / Stumps with bails
-      for (const sx of [-0.48, -0.42, -0.36]) {
-        sampleLine(addPoint, [sx, 0.55, -0.3], [sx, -0.15, -0.3], 45, 0.008);
-      }
-      // Bails across stumps
-      sampleLine(addPoint, [-0.5, -0.16, -0.3], [-0.34, -0.16, -0.3], 18, 0.006);
-
-      // Crease line
-      sampleLine(addPoint, [-0.8, 0.55, -0.3], [0.8, 0.55, -0.3], 50, 0.008);
-
-      // Cricket ball (accent red) & curved trajectory arc
-      for (let t = 0; t <= 1; t += 0.015) {
-        const pt = ballTrajectory(t);
-        addPoint(pt[0], pt[1], pt[2], false);
-      }
-
-      // Ball cluster at impact point
-      sampleArc(addPoint, ballFlightEnd, 0.065, 35, [1, 0, 0], [0, 1, 0], true, 0.008);
-      sampleArc(addPoint, ballFlightEnd, 0.065, 35, [0, 1, 0], [0, 0, 1], true, 0.008);
-    });
+    );
   },
 
   badminton(n) {
-    const transform = (p) => {
-      const [x, y, z] = rotateZ(p, -0.5);
-      return [x - 0.32, y + 0.02, z];
+    const racketTransform = (p) => {
+      const [rx, ry, rz] = rotateZ(p, -0.5);
+      return [rx - 0.32, ry + 0.02, rz];
+    };
+    const racketCenter = racketTransform([0, -0.3, -0.08]);
+    const pApex = [0.5, 0.05, 1.1];
+    const flightCurve = (t) => {
+      if (t < 0.55) {
+        const e = t / 0.55;
+        return arcInterpolate(racketCenter, pApex, 1 - (1 - e) * (1 - e), 0.95);
+      }
+      const e = (t - 0.55) / 0.45;
+      return arcInterpolate(pApex, racketCenter, e * e, 0.4);
     };
 
-    return buildShape(n, "sway", (addPoint) => {
-      // Oval racket frame
-      for (let a = 0; a < Math.PI * 2; a += 0.08) {
-        const rx = 0.22 * Math.cos(a);
-        const ry = -0.38 + 0.3 * Math.sin(a);
-        const [x, y, z] = transform([rx, ry, 0]);
-        addPoint(x, y, z);
+    return buildShape(
+      n,
+      "sway",
+      (addPoint) => {
+        const addRotRacket = (x, y, z, isAccent = false) => {
+          const [rx, ry, rz] = racketTransform([x, y, z]);
+          addPoint(rx, ry, rz, isAccent);
+        };
+
+        sampleArc(addRotRacket, [0, -0.3, 0], 1, 100, [0.28, 0, 0], [0, 0.38, 0], false, 0.006);
+        sampleArc(addRotRacket, [0, -0.3, 0], 1, 70, [0.28 + 0.03, 0, 0], [0, 0.38 + 0.03, 0], false, 0.006);
+
+        for (let t = -5; t <= 5; t++) {
+          const e = (t / 6) * 0.28;
+          const a = 0.38 * Math.sqrt(Math.max(0, 1 - (e / 0.28) ** 2));
+          sampleLine(addRotRacket, [e, -0.3 - a, 0], [e, -0.3 + a, 0], 7, 0.002);
+          const o = (t / 6) * 0.38;
+          const n = 0.28 * Math.sqrt(Math.max(0, 1 - (o / 0.38) ** 2));
+          sampleLine(addRotRacket, [-n, -0.3 + o, 0], [n, -0.3 + o, 0], 6, 0.002);
+        }
+
+        samplePolyline(
+          addRotRacket,
+          [
+            [-0.12, -0.3 + 0.33, 0],
+            [0, -0.3 + 0.52, 0],
+            [0.12, -0.3 + 0.33, 0]
+          ],
+          50,
+          0.005
+        );
+        sampleLine(addRotRacket, [-0.1, 0.06, 0], [0.1, 0.06, 0], 6, 0.004);
+        sampleLine(addRotRacket, [0, -0.3 + 0.52, 0], [0, 0.62, 0], 22, 0.005);
+        for (const t of [-0.032, 0.032]) {
+          sampleLine(addRotRacket, [t, 0.62, 0], [t, 0.95, 0], 10, 0.005);
+        }
+
+        for (let t = 0; t < 7; t++) {
+          sampleLine(addRotRacket, [-0.032, 0.66 + 0.042 * t, 0], [0.032, 0.69 + 0.042 * t, 0], 3, 0.003);
+        }
+        sampleArc(addRotRacket, [0, 0.96, 0], 0.035, 8, [1, 0, 0], [0, 0, 1], false, 0.004);
+
+        // Shuttlecock sampled relative to flightCurve(0)
+        const initShuttle = flightCurve(0);
+        const addShuttlePoint = (dx, dy, dz, isAccent = false) =>
+          addPoint(initShuttle[0] + dx, initShuttle[1] + dy, initShuttle[2] + dz, isAccent, [dx, dy, dz]);
+
+        // Cork tip dome
+        for (let t = 0; t < 26; t++) {
+          const a = Math.random() * Math.PI * 2;
+          const e = Math.random() * Math.PI * 0.5;
+          addShuttlePoint(
+            Math.cos(a) * Math.sin(e) * 0.06,
+            -0.06 * Math.cos(e),
+            Math.sin(a) * Math.sin(e) * 0.06,
+            true
+          );
+        }
+
+        // Feather cone
+        for (let t = 0; t < 16; t++) {
+          const a = (t / 16) * Math.PI * 2;
+          for (let k = 0; k < 4; k++) {
+            const frac = Math.random();
+            const r = 0.055 + 0.13 * frac;
+            addShuttlePoint(Math.cos(a) * r, 0.02 + 0.3 * frac, Math.sin(a) * r);
+          }
+        }
+
+        // Feather bands
+        for (const [y, r, count] of [
+          [0.16, 0.12, 12],
+          [0.32, 0.185, 22]
+        ]) {
+          for (let a = 0; a < count; a++) {
+            const angle = Math.random() * Math.PI * 2;
+            addShuttlePoint(Math.cos(angle) * r, y, Math.sin(angle) * r);
+          }
+        }
+      },
+      (param, x, y, z, time, target) => {
+        const prog = cyclicProgress(time, 2.4);
+        const p1 = flightCurve(prog);
+        const p2 = flightCurve(prog + 0.004);
+        let tx = p1[0] - p2[0];
+        let ty = p1[1] - p2[1];
+        let tz = p1[2] - p2[2];
+        const tLen = Math.hypot(tx, ty, tz) || 1;
+        tx /= tLen;
+        ty /= tLen;
+        tz /= tLen;
+
+        let nx = ty;
+        let ny = -tx;
+        const nLen = Math.hypot(nx, ny) || 1;
+        nx /= nLen;
+        ny /= nLen;
+
+        const bx = -tz * ny;
+        const by = tz * nx;
+        const bz = tx * ny - ty * nx;
+
+        setVec3(
+          target,
+          p1[0] + nx * param[0] + tx * param[1] + bx * param[2],
+          p1[1] + ny * param[0] + ty * param[1] + by * param[2],
+          p1[2] + tz * param[1] + bz * param[2]
+        );
       }
-
-      // Cross-string grid
-      for (let sx = -0.18; sx <= 0.18; sx += 0.04) {
-        const maxH = 0.3 * Math.sqrt(Math.max(0, 1 - (sx / 0.22) ** 2));
-        const p1 = transform([sx, -0.38 - maxH, 0]);
-        const p2 = transform([sx, -0.38 + maxH, 0]);
-        sampleLine(addPoint, p1, p2, 14, 0.005);
-      }
-      for (let sy = -0.62; sy <= -0.14; sy += 0.04) {
-        const dy = (sy - -0.38) / 0.3;
-        const maxW = 0.22 * Math.sqrt(Math.max(0, 1 - dy * dy));
-        const p1 = transform([-maxW, sy, 0]);
-        const p2 = transform([maxW, sy, 0]);
-        sampleLine(addPoint, p1, p2, 14, 0.005);
-      }
-
-      // Shaft and throat
-      const shaftTop = transform([0, -0.08, 0]);
-      const shaftBottom = transform([0, 0.52, 0]);
-      sampleLine(addPoint, shaftTop, shaftBottom, 45, 0.006);
-
-      // Handle grip
-      const handleBottom = transform([0, 0.85, 0]);
-      sampleLine(addPoint, shaftBottom, handleBottom, 40, 0.008);
-      sampleLine(addPoint, transform([-0.02, 0.52, 0]), transform([-0.02, 0.85, 0]), 35, 0.006);
-      sampleLine(addPoint, transform([0.02, 0.52, 0]), transform([0.02, 0.85, 0]), 35, 0.006);
-
-      // Shuttlecock cone & cork tip
-      const corkCenter = [0.4, -0.2, 0.1];
-      sampleArc(addPoint, corkCenter, 0.05, 30, [1, 0, 0], [0, 1, 0], true, 0.008);
-      sampleArc(addPoint, corkCenter, 0.05, 30, [0, 0, 1], [0, 1, 0], true, 0.008);
-
-      // Skirt feathers
-      for (let i = 0; i < 16; i++) {
-        const fa = (i / 16) * Math.PI * 2;
-        const skirtX = corkCenter[0] + 0.18 + 0.12 * Math.cos(fa);
-        const skirtY = corkCenter[1] - 0.22 + 0.12 * Math.sin(fa);
-        sampleLine(addPoint, corkCenter, [skirtX, skirtY, corkCenter[2] + 0.1 * Math.sin(fa)], 15, 0.006);
-      }
-    });
+    );
   },
 
   weekends(n) {
-    const rot = (p) => {
-      const [x, y, z] = rotateX([p[0], p[1], 0], 0.2);
-      return [x - 0.25, y + 0.3, z - 0.2];
+    const transform = (t) => {
+      const [rx, ry, rz] = rotateX([t[0], t[1], 0], 0.2);
+      return [rx - 0.25, ry + 0.3, rz - 0.2];
     };
+    const lakePoint = [0.1, -0.7, 0.45];
 
-    return buildShape(n, "sway", (addPoint) => {
-      // Mountain background ridges
-      samplePolyline(
-        addPoint,
-        [
-          [-1.0, 0.05, 0.85],
-          [-0.7, -0.35, 0.85],
-          [-0.45, -0.15, 0.85],
-          [-0.2, -0.45, 0.85],
-          [0.35, -0.2, 0.85],
-          [0.7, -0.55, 0.85],
-          [1.0, -0.1, 0.85]
-        ],
-        90,
-        0.015
-      );
+    return buildShape(
+      n,
+      "sway",
+      (addPoint) => {
+        // Mountain background ridges
+        samplePolyline(
+          addPoint,
+          [
+            [-1, 0.05, 0.85],
+            [-0.7, -0.35, 0.85],
+            [-0.45, -0.15, 0.85],
+            [-0.2, -0.45, 0.85],
+            [0.35, -0.2, 0.85],
+            [0.6, -0.5, 0.85],
+            [1, -0.05, 0.85]
+          ],
+          40,
+          0.01
+        );
 
-      // Mountain interior shading
-      for (let i = 0; i < 180; i++) {
-        const mx = randomRange(-0.9, 0.9);
-        const my = randomRange(-0.4, 0.3);
-        addPoint(mx, my, 0.85 + randomRange(-0.02, 0.02));
+        samplePolyline(
+          addPoint,
+          [
+            [-1, 0.35, 0.45],
+            [-0.62, -0.25, 0.45],
+            [-0.38, 0.05, 0.45],
+            lakePoint,
+            [0.55, 0, 0.45],
+            [0.75, -0.2, 0.45],
+            [1, 0.25, 0.45]
+          ],
+          55,
+          0.01
+        );
+
+        samplePolyline(
+          addPoint,
+          [
+            [-0.04, -0.5, 0.45],
+            [0.05, -0.46, 0.45],
+            [0.12, -0.53, 0.45],
+            [0.21, -0.48, 0.45]
+          ],
+          50,
+          0.005
+        );
+
+        samplePolyline(
+          addPoint,
+          [
+            [-0.7, -0.14, 0.45],
+            [-0.64, -0.1, 0.45],
+            [-0.58, -0.17, 0.45]
+          ],
+          50,
+          0.005
+        );
+
+        // Tree lines
+        for (let e = 0; e < 5; e++) {
+          sampleLine(
+            addPoint,
+            [0.2 + 0.06 * e, -0.55 + 0.1 * e, 0.45],
+            [0.15 + 0.06 * e, -0.45 + 0.1 * e, 0.45],
+            3,
+            0.003
+          );
+        }
+
+        // Trail
+        const trail = [
+          [-0.25, 0.3, 0.42],
+          [-0.05, 0.12, 0.42],
+          [-0.2, -0.05, 0.42],
+          [0.02, -0.22, 0.42],
+          [-0.08, -0.4, 0.42],
+          [0.08, -0.6, 0.42]
+        ];
+        for (let e = 0; e < trail.length - 1; e++) {
+          const p1 = trail[e];
+          const p2 = trail[e + 1];
+          const steps = Math.round(Math.hypot(p2[0] - p1[0], p2[1] - p1[1]) / 0.035);
+          for (let s = 0; s < steps; s++) {
+            addPoint(
+              p1[0] + ((p2[0] - p1[0]) * s) / steps,
+              p1[1] + ((p2[1] - p1[1]) * s) / steps,
+              p1[2]
+            );
+          }
+        }
+
+        // Lake shoreline
+        sampleLine(addPoint, lakePoint, [lakePoint[0], -0.95, 0.45], 10, 0.004);
+
+        // Undulating lake waves
+        for (let e = 0; e < 30; e++) {
+          let u = Math.random();
+          let v = Math.random();
+          if (u + v > 1) {
+            u = 1 - u;
+            v = 1 - v;
+          }
+          addPoint(lakePoint[0] + 0.2 * u, -0.95 + 0.075 * u + 0.15 * v, 0.45, true, [0, u, v]);
+        }
+
+        // Clouds
+        for (const [cloudY, offset] of [
+          [-0.62, 0],
+          [-0.3, 0.55]
+        ]) {
+          for (let a = 0; a < 22; a++) {
+            const puff = Math.floor(3 * Math.random());
+            const angle = Math.random() * Math.PI * 2;
+            const radius = Math.sqrt(Math.random()) * (puff === 1 ? 0.08 : 0.06);
+            const puffX = (puff - 1) * 0.09 + Math.cos(angle) * radius;
+            addPoint(
+              puffX,
+              cloudY + Math.sin(angle) * radius * 0.7 - (puff === 1 ? 0.03 : 0),
+              0.65,
+              false,
+              [1, offset, puffX]
+            );
+          }
+        }
+
+        // Cabin / tent
+        samplePolyline(
+          addPoint,
+          [
+            [-0.45, -0.32, 0],
+            [0.45, -0.32, 0],
+            [0.45, 0.22, 0],
+            [-0.45, 0.22, 0]
+          ].map(transform),
+          60,
+          0.007,
+          false,
+          true
+        );
+
+        samplePolyline(
+          addPoint,
+          [
+            [-0.41, -0.29, 0],
+            [0.41, -0.29, 0],
+            [0.41, 0.19, 0],
+            [-0.41, 0.19, 0]
+          ].map(transform),
+          40,
+          0.004,
+          false,
+          true
+        );
+
+        [0, 1, 1, 2, 1].forEach((rVal, idx) => {
+          const o = -0.36 + 0.08 * rVal;
+          const n = -0.22 + 0.075 * idx;
+          sampleLine(addPoint, transform([o, n, 0]), transform([o + randomRange(0.15, 0.4), n, 0]), 6, 0.005);
+        });
+
+        // Trail path points & moving hiker / vehicle
+        for (let r = 0; r < 14; r++) {
+          const frac = Math.random();
+          const pos = transform([-0.36 + 0.62 * frac, 0.155, 0]);
+          addPoint(pos[0], pos[1], pos[2], false, [2, frac]);
+        }
+
+        for (let r = 0; r < 8; r++) {
+          const jx = randomRange(0, 0.025);
+          const jy = randomRange(-0.03, 0.03);
+          const pos = transform([-0.36 + jx, 0.155 + jy, 0]);
+          addPoint(pos[0], pos[1], pos[2], true, [3, jx, jy]);
+        }
+
+        // Boardwalk
+        samplePolyline(
+          addPoint,
+          [
+            [-0.5, 0.52, -0.2],
+            [0.5, 0.52, -0.2],
+            [0.58, 0.66, -0.45],
+            [-0.58, 0.66, -0.45]
+          ].map(([x, y, z]) => [x - 0.25, y, z]),
+          60,
+          0.007,
+          false,
+          true
+        );
+
+        for (let e = 0; e < 3; e++) {
+          for (let r = 0; r < 9; r++) {
+            const a = 0.15 + 0.22 * e;
+            const o = -0.25 + (r / 8 - 0.5) * 0.8 * (1 + 0.16 * a);
+            sampleLine(
+              addPoint,
+              [o - 0.03, 0.52 + 0.14 * a * 0.5, -0.2 - 0.25 * a * 0.5],
+              [o + 0.03, 0.52 + 0.14 * a * 0.5, -0.2 - 0.25 * a * 0.5],
+              2,
+              0.003
+            );
+          }
+        }
+
+        samplePolyline(
+          addPoint,
+          [
+            [-0.4, 0.625, -0.37],
+            [-0.1, 0.625, -0.37],
+            [-0.08, 0.65, -0.43],
+            [-0.42, 0.65, -0.43]
+          ],
+          50,
+          0.003,
+          false,
+          true
+        );
+      },
+      (param, x, y, z, time, target) => {
+        if (param[0] === 0) {
+          const wave = 0.03 * Math.sin(5 * time - 6 * param[1]) * param[1];
+          setVec3(target, x, y + wave, z + 0.6 * wave);
+        } else if (param[0] === 1) {
+          setVec3(target, -1.25 + 2.5 * cyclicProgress(time, 16, param[1]) + param[2], y, z);
+        } else {
+          const prog = Math.min(1, 1.4 * cyclicProgress(time, 3.4));
+          const pathX =
+            -0.36 +
+            (param[0] === 2 ? Math.min(param[1], prog) : prog) * 0.62 +
+            (param[0] === 3 ? param[1] : 0);
+          const pathY = 0.155 + (param[0] === 3 ? param[2] : 0);
+          const pos = transform([pathX, pathY, 0]);
+          setVec3(target, pos[0], pos[1], pos[2]);
+        }
       }
-
-      // Laptop keyboard base (trapezoid in perspective)
-      const basePoints = [
-        rot([-0.55, 0.45, 0]),
-        rot([0.55, 0.45, 0]),
-        rot([0.45, 0.05, 0]),
-        rot([-0.45, 0.05, 0])
-      ];
-      samplePolyline(addPoint, basePoints, 65, 0.008, false, true);
-
-      // Trackpad
-      samplePolyline(
-        addPoint,
-        [
-          rot([-0.14, 0.42, 0]),
-          rot([0.14, 0.42, 0]),
-          rot([0.14, 0.28, 0]),
-          rot([-0.14, 0.28, 0])
-        ],
-        40,
-        0.006,
-        false,
-        true
-      );
-
-      // Laptop open screen (upright tilted back)
-      const screenPoints = [
-        rot([-0.45, 0.05, 0]),
-        rot([0.45, 0.05, 0]),
-        rot([0.45, -0.55, -0.25]),
-        rot([-0.45, -0.55, -0.25])
-      ];
-      samplePolyline(addPoint, screenPoints, 70, 0.008, false, true);
-
-      // Screen bezel interior / code lines
-      for (let l = 0; l < 8; l++) {
-        const sy = -0.05 - 0.055 * l;
-        const lineLen = randomRange(0.2, 0.65);
-        const p1 = rot([-0.38, sy, -0.035 * l]);
-        const p2 = rot([-0.38 + lineLen, sy, -0.035 * l]);
-        sampleLine(addPoint, p1, p2, 16, 0.006, l === 2 || l === 5);
-      }
-    });
+    );
   },
 
   goal(n) {
     const scale = (x, y, z) => [0.84 * x - 0.14, 0.84 * y, 0.84 * z];
 
-    return buildShape(n, "sway", (addPoint) => {
-      const addScaled = (x, y, z, accent, param) => {
-        const [sx, sy, sz] = scale(x, y, z);
-        addPoint(sx, sy, sz, accent, param);
-      };
+    return buildShape(
+      n,
+      "sway",
+      (addPoint) => {
+        const addScaled = (x, y, z, isAccent = false, param = null) => {
+          const [sx, sy, sz] = scale(x, y, z);
+          addPoint(sx, sy, sz, isAccent, param);
+        };
 
-      // Bank vault / safe door outer frame
-      samplePolyline(
-        addScaled,
-        [
-          [-0.82, -0.82, 0.08],
-          [0.82, -0.82, 0.08],
-          [0.82, 0.82, 0.08],
-          [-0.82, 0.82, 0.08]
-        ],
-        60,
-        0.012,
-        false,
-        true
-      );
-
-      // Inner safe door border
-      samplePolyline(
-        addScaled,
-        [
-          [-0.72, -0.72, 0.08],
-          [0.72, -0.72, 0.08],
-          [0.72, 0.72, 0.08],
-          [-0.72, 0.72, 0.08]
-        ],
-        50,
-        0.01,
-        false,
-        true
-      );
-
-      // Vault door bevel sides / depth
-      for (const corner of [
-        [-0.82, -0.82],
-        [0.82, -0.82],
-        [0.82, 0.82],
-        [-0.82, 0.82]
-      ]) {
-        sampleLine(
+        // Static vault frame
+        samplePolyline(
           addScaled,
-          [corner[0], corner[1], 0.08],
-          [corner[0], corner[1], -0.25],
-          20,
-          0.008
+          [
+            [-0.82, -0.82, 0.08],
+            [0.82, -0.82, 0.08],
+            [0.82, 0.82, 0.08],
+            [-0.82, 0.82, 0.08]
+          ],
+          60,
+          0.006,
+          false,
+          true
         );
-      }
 
-      // Safe circular dial & locking spokes
-      sampleArc(addScaled, [0, 0, 0.12], 0.32, 60, [1, 0, 0], [0, 1, 0], false, 0.006);
-      sampleArc(addScaled, [0, 0, 0.12], 0.14, 35, [1, 0, 0], [0, 1, 0], true, 0.006);
-      // Dial turning handles (4 spokes)
-      for (let s = 0; s < 4; s++) {
-        const sa = (s * Math.PI) / 2;
-        const hx = Math.cos(sa) * 0.42;
-        const hy = Math.sin(sa) * 0.42;
-        sampleLine(addScaled, [0, 0, 0.14], [hx, hy, 0.14], 18, 0.006);
-      }
+        samplePolyline(
+          addScaled,
+          [
+            [-0.82 + 0.05, -0.82 + 0.05, 0.08],
+            [0.82 - 0.05, -0.82 + 0.05, 0.08],
+            [0.82 - 0.05, 0.82 - 0.05, 0.08],
+            [-0.82 + 0.05, 0.82 - 0.05, 0.08]
+          ],
+          30,
+          0.004,
+          false,
+          true
+        );
 
-      // Locking bolts along left and right edges
-      for (let b = 0; b < 3; b++) {
-        const by = -0.5 + 0.5 * b;
-        sampleLine(addScaled, [0.72, by, 0.08], [0.84, by, 0.08], 12, 0.005, true);
-        sampleLine(addScaled, [-0.72, by, 0.08], [-0.84, by, 0.08], 12, 0.005, true);
+        sampleArc(addScaled, [0, 0, 0.08], 0.62, 60, [1, 0, 0], [0, 1, 0], false, 0.005);
+        sampleArc(addScaled, [0, 0, 0.3], 0.58 - 0.02, 30, [1, 0, 0], [0, 1, 0], false, 0.006);
+
+        // Vault door points tagged with [0]
+        const addDoorPoint = (x, y, z) => addScaled(x, y, z, false, [0]);
+        for (const z of [-0.06, 0.06]) {
+          sampleArc(addDoorPoint, [0, 0, z], 0.58, 60, [1, 0, 0], [0, 1, 0], false, 0.005);
+        }
+
+        for (let t = 0; t < 24; t++) {
+          const a = Math.random() * Math.PI * 2;
+          addDoorPoint(0.58 * Math.cos(a), 0.58 * Math.sin(a), randomRange(-0.06, 0.06));
+        }
+
+        sampleArc(addDoorPoint, [0, 0, -0.065], 0.46, 40, [1, 0, 0], [0, 1, 0], false, 0.004);
+        for (const hingeY of [-0.3, 0.3]) {
+          samplePolyline(
+            addDoorPoint,
+            [
+              [0.66 - 0.08, hingeY - 0.06, -0.06],
+              [0.68, hingeY - 0.06, -0.06],
+              [0.68, hingeY + 0.06, -0.06],
+              [0.66 - 0.08, hingeY + 0.06, -0.06]
+            ],
+            80,
+            0.004,
+            false,
+            true
+          );
+        }
+
+        // Combination dial points tagged with [1, angle, radius]
+        for (let t = 0; t < 18; t++) {
+          const a = Math.random() * Math.PI * 2;
+          addScaled(0.07 * Math.cos(a), 0.07 * Math.sin(a), -0.11, false, [1, a, 0.07]);
+        }
+
+        for (let t = 0; t < 5; t++) {
+          const spokeAngle = (t / 5) * Math.PI * 2;
+          for (let s = 0; s < 10; s++) {
+            const r = randomRange(0.07, 0.3);
+            addScaled(Math.cos(spokeAngle) * r, Math.sin(spokeAngle) * r, -0.11, false, [
+              1,
+              spokeAngle + randomRange(-0.03, 0.03),
+              r
+            ]);
+          }
+          for (let s = 0; s < 6; s++) {
+            const handleA = Math.random() * Math.PI * 2;
+            addScaled(
+              0.31 * Math.cos(spokeAngle) + 0.025 * Math.cos(handleA),
+              0.31 * Math.sin(spokeAngle) + 0.025 * Math.sin(handleA),
+              -0.11,
+              false,
+              [1, spokeAngle + (0.025 * Math.cos(handleA)) / 0.31, 0.31 + 0.025 * Math.sin(handleA)]
+            );
+          }
+        }
+
+        // Locking bolts tagged with [2, angle, radius, jitter]
+        for (let t = 0; t < 8; t++) {
+          const boltAngle = ((t + 0.5) / 8) * Math.PI * 2;
+          for (let s = 0; s < 12; s++) {
+            const boltR = randomRange(0, 0.14);
+            const boltJitter = randomRange(-0.025, 0.025);
+            addScaled(
+              Math.cos(boltAngle) * (0.58 - 0.02 + boltR) - Math.sin(boltAngle) * boltJitter,
+              Math.sin(boltAngle) * (0.58 - 0.02 + boltR) + Math.cos(boltAngle) * boltJitter,
+              0,
+              false,
+              [2, boltAngle, boltR, boltJitter]
+            );
+          }
+        }
+
+        // Interior gold shimmer bullion tagged with [3, angle, radiusFrac, phase]
+        for (let t = 0; t < 70; t++) {
+          addScaled(0, 3, 0.25, true, [
+            3,
+            Math.random() * Math.PI * 2,
+            Math.sqrt(Math.random()),
+            Math.random()
+          ]);
+        }
+      },
+      (param, x, y, z, time, target) => {
+        const cycle = cyclicProgress(time, 7);
+        const openFactor = smoothstep((cycle - 0.3) / 0.2) * (1 - smoothstep((cycle - 0.68) / 0.18));
+        let pos;
+
+        if (param[0] === 0) {
+          pos = [(x - -0.14) / 0.84, y / 0.84, z / 0.84];
+        } else if (param[0] === 1) {
+          const turn =
+            param[1] +
+            (smoothstep(cycle / 0.2) * Math.PI * 1.5 - smoothstep((cycle - 0.88) / 0.1) * Math.PI * 1.5);
+          pos = [Math.cos(turn) * param[2], Math.sin(turn) * param[2], -0.11];
+        } else if (param[0] === 2) {
+          const retract =
+            0.58 - 0.02 + param[2] - 0.13 * (smoothstep((cycle - 0.2) / 0.1) * (1 - smoothstep((cycle - 0.86) / 0.06)));
+          pos = [
+            Math.cos(param[1]) * retract - Math.sin(param[1]) * param[3],
+            Math.sin(param[1]) * retract + Math.cos(param[1]) * param[3],
+            0
+          ];
+        } else {
+          if (openFactor < 0.05) {
+            setVec3(target, x, y, z);
+            return;
+          }
+          const shimmer =
+            0.52 *
+            param[2] *
+            openFactor *
+            (0.85 + 0.15 * Math.sin(3 * time + 9 * param[3]));
+          const [gx, gy, gz] = scale(
+            Math.cos(param[1]) * shimmer,
+            Math.sin(param[1]) * shimmer,
+            0.25 - 0.15 * param[2]
+          );
+          setVec3(target, gx, gy, gz);
+          return;
+        }
+
+        const hingeX = 0.66;
+        const relX = pos[0] - hingeX;
+        const doorAngle = 1.3 * openFactor;
+        const rotatedX = hingeX + relX * Math.cos(doorAngle) - pos[2] * Math.sin(doorAngle);
+        const rotatedY = pos[1];
+        const rotatedZ = relX * Math.sin(doorAngle) + pos[2] * Math.cos(doorAngle);
+        const [fx, fy, fz] = scale(rotatedX, rotatedY, rotatedZ);
+        setVec3(target, fx, fy, fz);
       }
-    });
+    );
   },
 
   bonfire(n) {
-    return buildShape(n, "sway", (addPoint) => {
-      // Radial campfire logs
-      for (let log = 0; log < 8; log++) {
-        const a = (log / 8) * Math.PI * 2;
-        const p1 = [Math.cos(a) * 0.55, 0.65, Math.sin(a) * 0.55];
-        const p2 = [Math.cos(a + Math.PI) * 0.15, 0.48, Math.sin(a + Math.PI) * 0.15];
-        sampleLine(addPoint, p1, p2, 28, 0.015);
-      }
+    return buildShape(
+      n,
+      "sway",
+      (addPoint) => {
+        // Fire pit ground ring embers
+        for (let e = 0; e < 70; e++) {
+          const a = Math.random() * Math.PI * 2;
+          const r = 0.5 * Math.sqrt(Math.random());
+          addPoint(Math.cos(a) * r, 0.55 - 0.14 * (1 - (r / 0.5) ** 2), Math.sin(a) * r * 0.8);
+        }
 
-      // Campfire flame body (rising cones)
-      for (let i = 0; i < 220; i++) {
-        const h = Math.random();
-        const radius = (1 - h) * 0.35;
-        const a = Math.random() * Math.PI * 2;
-        const x = Math.cos(a) * radius * randomRange(0.6, 1.2);
-        const y = 0.55 - h * 1.05;
-        const z = Math.sin(a) * radius * randomRange(0.6, 1.2);
-        addPoint(x, y, z, h > 0.4);
+        // Stone embers
+        for (let e = 0; e < 10; e++) {
+          const a = (e / 10) * Math.PI * 2 + randomRange(-0.1, 0.1);
+          sampleArc(
+            addPoint,
+            [0.56 * Math.cos(a), 0.53, 0.45 * Math.sin(a)],
+            0.045,
+            7,
+            [1, 0, 0],
+            [0, 0.6, 0],
+            false,
+            0.008
+          );
+        }
+
+        // Radial campfire logs
+        for (const [angle, length] of [
+          [0.4, 0.62],
+          [2.0, 0.55],
+          [3.3, 0.6],
+          [4.9, 0.5]
+        ]) {
+          const lx = Math.cos(angle) * length * 0.5;
+          const lz = Math.sin(angle) * length * 0.4;
+          for (const off of [-0.025, 0.025]) {
+            sampleLine(addPoint, [-lx, 0.55 - 0.06 + off, -lz], [lx, 0.55 - 0.1 + off, lz], 12, 0.008);
+          }
+        }
+
+        // Coiled sword
+        const addRotSword = (x, y, z, isAccent = false) => {
+          const [rx, ry, rz] = rotateZ([x, y, z], 0.08);
+          addPoint(rx, ry, rz, isAccent);
+        };
+        const groundY = 0.55 - 0.08;
+
+        for (const side of [-1, 1]) {
+          sampleLine(addRotSword, [0.03 * side, groundY, 0], [0.05 * side, -0.36, 0], 26, 0.004);
+        }
+        sampleLine(addRotSword, [0, groundY, -0.01], [0, -0.36, -0.01], 14, 0.003);
+
+        // Twisted spiral blade
+        for (let t = 0; t < 70; t++) {
+          const y = randomRange(groundY, -0.05);
+          const spiralAngle = 38 * y;
+          addRotSword(0.065 * Math.cos(spiralAngle), y, 0.065 * Math.sin(spiralAngle));
+        }
+
+        // Crossguard
+        samplePolyline(
+          addRotSword,
+          [
+            [-0.17, -0.36 + 0.02, 0],
+            [-0.19, -0.38, 0],
+            [0.19, -0.38, 0],
+            [0.17, -0.36 + 0.02, 0]
+          ],
+          70,
+          0.005,
+          false,
+          true
+        );
+
+        // Hilt
+        for (const hx of [-0.025, 0.025]) {
+          sampleLine(addRotSword, [hx, -0.39, 0], [hx, -0.6, 0], 10, 0.004);
+        }
+        for (let t = 0; t < 6; t++) {
+          sampleLine(addRotSword, [-0.025, -0.41 - 0.04 * t, 0], [0.025, -0.39 - 0.04 * t, 0], 2, 0.003);
+        }
+
+        // Pommel
+        sampleArc(addRotSword, [0, -0.64, 0], 0.035, 12, [1, 0, 0], [0, 1, 0], false, 0.004);
+
+        // Flame particles
+        for (let e = 0; e < 70; e++) {
+          const a = Math.random() * Math.PI * 2;
+          const r = 0.2 * Math.sqrt(Math.random());
+          const rx = Math.cos(a) * r;
+          const rz = Math.sin(a) * r * 0.8;
+          addPoint(rx, 0.55 - 0.1, Math.sin(a) * r, true, [0, rx, rz, Math.random(), randomRange(0.35, 0.65)]);
+        }
+
+        // Smoke spark particles
+        for (let e = 0; e < 10; e++) {
+          addPoint(0, 0.55 - 0.2, 0, true, [1, randomRange(-0.18, 0.18), randomRange(-0.15, 0.15), Math.random()]);
+        }
+      },
+      (param, x, y, z, time, target) => {
+        if (param[0] === 0) {
+          const prog = cyclicProgress(time, 0.8 + param[4], param[3]);
+          const r = Math.pow(1 - prog, 0.8);
+          setVec3(
+            target,
+            param[1] * r + 0.035 * Math.sin(6 * time + 20 * param[3]) * prog,
+            0.55 - 0.1 - prog * param[4],
+            param[2] * r + 0.03 * Math.cos(5 * time + 17 * param[3]) * prog + 0.5 * prog
+          );
+        } else {
+          const prog = cyclicProgress(time, 3.2, param[3]);
+          setVec3(
+            target,
+            param[1] + 0.12 * Math.sin(1.5 * time + 9 * param[3]) * prog + 0.15 * prog,
+            0.55 - 0.2 - 1.15 * prog,
+            param[2] + 0.6 * prog
+          );
+        }
       }
-    });
+    );
   },
 
   zuno(n) {
