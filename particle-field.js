@@ -1247,6 +1247,90 @@ export const ShapeLibrary = {
       }
     });
   },
+  envelope(n) {
+    const outline = [
+      [[-0.9, -0.58, 0], [0.9, -0.58, 0]],
+      [[0.9, -0.58, 0], [0.9, 0.58, 0]],
+      [[0.9, 0.58, 0], [-0.9, 0.58, 0]],
+      [[-0.9, 0.58, 0], [-0.9, -0.58, 0]],
+      [[-0.9, -0.58, 0], [0, 0.08, 0]],
+      [[0.9, -0.58, 0], [0, 0.08, 0]]
+    ];
+
+    return buildShape(n, true, (addPoint) => {
+      for (const [p1, p2] of outline) {
+        sampleLine(addPoint, p1, p2, 24, 0.02);
+      }
+      for (let i = 0; i < 14; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const radius = 0.11 * Math.sqrt(Math.random());
+        addPoint(
+          Math.cos(angle) * radius,
+          0.08 + Math.sin(angle) * radius,
+          -0.02,
+          true
+        );
+      }
+    });
+  },
+
+  message(n) {
+    return this.envelope(n);
+  },
+
+  plane(n) {
+    const rotatePlane = ([x, y, z]) => {
+      const a = 0.5403023058681398 * y - 0.8414709848078965 * z;
+      const o = 0.8414709848078965 * y + 0.5403023058681398 * z;
+      const nCoord = 0.4535961214255773 * x - 0.8912073600614354 * o;
+      return [
+        0.8775825618903728 * nCoord - -0.479425538604203 * a,
+        -0.479425538604203 * nCoord + 0.8775825618903728 * a,
+        0.8912073600614354 * x + 0.4535961214255773 * o
+      ];
+    };
+
+    const nose = [1, 0, 0];
+    const tail = [-0.8, 0, 0];
+    const wingL = [-0.8, -0.08, -0.62];
+    const wingR = [-0.8, -0.08, 0.62];
+    const keel = [-0.8, 0.26, 0];
+
+    const sampleTriangle = (addPoint, v1, v2, v3, count) => {
+      for (let i = 0; i < count; i++) {
+        let p;
+        if (Math.random() < 0.45) {
+          const [pA, pB] = Math.random() < 0.5 ? [v2, v3] : [v1, v3];
+          p = samplePointOnSegment(pA, pB, Math.random(), 0.012);
+        } else {
+          let u = Math.random();
+          let v = Math.random();
+          if (u + v > 1) {
+            u = 1 - u;
+            v = 1 - v;
+          }
+          p = [
+            v2[0] + (v1[0] - v2[0]) * u + (v3[0] - v2[0]) * v,
+            v2[1] + (v1[1] - v2[1]) * u + (v3[1] - v2[1]) * v,
+            v2[2] + (v1[2] - v2[2]) * u + (v3[2] - v2[2]) * v
+          ];
+        }
+        const [rx, ry, rz] = rotatePlane(p);
+        addPoint(rx, ry, rz);
+      }
+    };
+
+    return buildShape(n, false, (addPoint) => {
+      sampleTriangle(addPoint, nose, tail, wingL, 60);
+      sampleTriangle(addPoint, nose, tail, wingR, 60);
+      sampleTriangle(addPoint, nose, tail, keel, 26);
+      for (let i = 0; i < 22; i++) {
+        const [rx, ry, rz] = rotatePlane(samplePointOnSegment(nose, tail, Math.random(), 0.01));
+        addPoint(rx, ry, rz, true);
+      }
+    });
+  },
+
 
   github(n) {
     return sampleSvgPaths(n, [
@@ -2283,6 +2367,8 @@ export function createParticleSystem(container, options = {}) {
       shape = ShapeLibrary[name].call(ShapeLibrary, engine.n);
     } else if (typeof ShapeLibrary[normalized] === "function") {
       shape = ShapeLibrary[normalized].call(ShapeLibrary, engine.n);
+    } else if (parts[0] === "message") {
+      shape = ShapeLibrary.envelope(engine.n);
     } else {
       shape = sampleText(engine.n, name);
     }

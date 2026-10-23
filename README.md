@@ -49,6 +49,7 @@ The following shapes are bundled in `ShapeLibrary`:
 | `bonfire` | Campfire radial logs with flickering flame cone particles |
 | `zuno` | Browser window frame with address bar, tabs, and window dots |
 | `resume` | Document sheet with folded corner and content lines |
+| `envelope` / `message` | 3D spinning envelope with diagonal flap folds and red wax seal accent |
 | `github` | GitHub Octocat logo SVG vector paths |
 | `linkedin` | LinkedIn logo SVG vector paths |
 | `x` | X (Twitter) cross logo SVG vector paths |
