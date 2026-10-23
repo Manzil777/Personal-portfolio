@@ -13,22 +13,7 @@ A modular, high-performance 3D particle animation personal website. It renders t
 | `demo.html` | **Interactive Standalone Showcase**: Single-file demonstration with light/dark theme toggling, hover list cards, and real-time custom text morphing. |
 | `server.py` | **Development Server**: Multi-threaded Python server with automatic Next.js chunk routing and asset rewrites. |
 
----
-
-## 1. Quick Start
-
-### Running the Standalone Demo
-Start the dev server (or any static HTTP server):
-```bash
-python3 server.py 3000
-```
-Open your browser to:
-- **Standalone Demo**: `http://localhost:3000/demo.html`
-- **Reconstructed Portfolio**: `http://localhost:3000/`
-
----
-
-## 2. Core Architecture & Physics (`particle-field.js`)
+## 1. Core Architecture & Physics (`particle-field.js`)
 
 The engine is built around high-performance WebGL-grade data structures using Canvas 2D:
 
@@ -50,7 +35,7 @@ The engine is built around high-performance WebGL-grade data structures using Ca
 - **Perspective Scale**: $\text{proj} = \frac{2.6}{2.6 + z}$.
 - **Spring-Damper Repulsion**: Acceleration $a = (F_{\text{target}} - x) \cdot 60 - 11 \cdot v$.
 
-## 3. Built-in Shape Library
+## 2. Built-in Shape Library
 
 The following shapes are bundled in `ShapeLibrary`:
 
@@ -71,7 +56,7 @@ The following shapes are bundled in `ShapeLibrary`:
 
 ---
 
-## 4. Adding New Custom 3D Shapes
+## 3. Adding New Custom 3D Shapes
 
 You can create new procedural shapes using the exported sampling primitives in `particle-field.js`:
 
