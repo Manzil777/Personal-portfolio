@@ -100,9 +100,9 @@ def update_index():
 
     new_ol0 = (
         '<ol id="_R_dlflb_-panel-0" role="tabpanel" aria-labelledby="_R_dlflb_-tab-0" class="grid grid-cols-2 content-start gap-x-4 [grid-area:1/1] lg:block ">'
-        '<li data-shape="project:proteinclassify" data-summary="Bioinformatics platform classifying protein sequences across 321 families with real-time 3D structure predictions via ESMFold." data-title="ProteinClassify" class="group"><a href="https://github.com/Manzil777/ProteinClassify" target="_blank" rel="noopener noreferrer" class="flex items-baseline gap-2.5 border-b border-line py-2 lg:gap-4 lg:py-3 transition-colors hover:text-muted"><span class="w-6 shrink-0 text-xs tabular-nums text-muted">01</span><span class="min-w-0 truncate transition-colors group-data-pinned:text-accent lg:shrink-0 lg:overflow-visible">ProteinClassify</span><span class="hidden min-w-0 flex-1 truncate text-right text-xs text-muted lg:block">Meta ESM-2 · PyTorch</span></a></li>'
-        '<li data-shape="project:sentiment-analysis" data-summary="End-to-end NLP pipeline classifying 1,000+ student feedback entries with 88% accuracy and automated SMTP workflows." data-title="Sentiment Analysis" class="group"><a href="https://github.com/Manzil777/Sentiment-Analysis" target="_blank" rel="noopener noreferrer" class="flex items-baseline gap-2.5 border-b border-line py-2 lg:gap-4 lg:py-3 transition-colors hover:text-muted"><span class="w-6 shrink-0 text-xs tabular-nums text-muted">02</span><span class="min-w-0 truncate transition-colors group-data-pinned:text-accent lg:shrink-0 lg:overflow-visible">Sentiment Analysis</span><span class="hidden min-w-0 flex-1 truncate text-right text-xs text-muted lg:block">NLP · Scikit-Learn</span></a></li>'
-        '<li data-shape="project:soletrack" data-summary="Lightweight retail footwear POS &amp; inventory management system with role-based auth, SKU-level tracking, and stock analytics." data-title="SoleTrack" class="group"><a href="https://github.com/Manzil777/SoleTrack" target="_blank" rel="noopener noreferrer" class="flex items-baseline gap-2.5 border-b border-line py-2 lg:gap-4 lg:py-3 transition-colors hover:text-muted"><span class="w-6 shrink-0 text-xs tabular-nums text-muted">03</span><span class="min-w-0 truncate transition-colors group-data-pinned:text-accent lg:shrink-0 lg:overflow-visible">SoleTrack</span><span class="hidden min-w-0 flex-1 truncate text-right text-xs text-muted lg:block">POS · PHP · MariaDB</span></a></li>'
+        '<li data-shape="project:proteinclassify" data-summary="Bioinformatics platform classifying protein sequences across 321 families with real-time 3D structure predictions via ESMFold." data-title="ProteinClassify" class="group"><a href="https://github.com/Manzil777/protein-transformer-learning" target="_blank" rel="noopener noreferrer" class="flex items-baseline gap-2.5 border-b border-line py-2 lg:gap-4 lg:py-3 transition-colors hover:text-muted"><span class="w-6 shrink-0 text-xs tabular-nums text-muted">01</span><span class="min-w-0 truncate transition-colors group-data-pinned:text-accent lg:shrink-0 lg:overflow-visible">ProteinClassify</span><span class="hidden min-w-0 flex-1 truncate text-right text-xs text-muted lg:block">Meta ESM-2 · PyTorch</span></a></li>'
+        '<li data-shape="project:sentiment-analysis" data-summary="End-to-end NLP pipeline classifying 1,000+ student feedback entries with 88% accuracy and automated SMTP workflows." data-title="Sentiment Analysis" class="group"><a href="https://github.com/Aayush-Rasaily/Student-Feedback-System-Using-Sentimental-Analysis" target="_blank" rel="noopener noreferrer" class="flex items-baseline gap-2.5 border-b border-line py-2 lg:gap-4 lg:py-3 transition-colors hover:text-muted"><span class="w-6 shrink-0 text-xs tabular-nums text-muted">02</span><span class="min-w-0 truncate transition-colors group-data-pinned:text-accent lg:shrink-0 lg:overflow-visible">Sentiment Analysis</span><span class="hidden min-w-0 flex-1 truncate text-right text-xs text-muted lg:block">NLP · Scikit-Learn</span></a></li>'
+        '<li data-shape="project:soletrack" data-summary="Lightweight retail footwear POS &amp; inventory management system with role-based auth, SKU-level tracking, and stock analytics." data-title="SoleTrack" class="group"><a href="https://github.com/Manzil777/SHOE-INVENTORY-MANAGEMENT-SYSTEM-with-POS" target="_blank" rel="noopener noreferrer" class="flex items-baseline gap-2.5 border-b border-line py-2 lg:gap-4 lg:py-3 transition-colors hover:text-muted"><span class="w-6 shrink-0 text-xs tabular-nums text-muted">03</span><span class="min-w-0 truncate transition-colors group-data-pinned:text-accent lg:shrink-0 lg:overflow-visible">SoleTrack</span><span class="hidden min-w-0 flex-1 truncate text-right text-xs text-muted lg:block">POS · PHP · MariaDB</span></a></li>'
         '</ol>'
     )
     content = content.replace(old_ol0, new_ol0)
@@ -180,21 +180,21 @@ def update_index():
                     {
                         "title": "ProteinClassify",
                         "detail": "Meta ESM-2 · PyTorch",
-                        "href": "https://github.com/Manzil777/ProteinClassify",
+                        "href": "https://github.com/Manzil777/protein-transformer-learning",
                         "shape": "project:proteinclassify",
                         "summary": "Bioinformatics platform classifying protein sequences across 321 families with real-time 3D structure predictions via ESMFold."
                     },
                     {
                         "title": "Sentiment Analysis",
                         "detail": "NLP · Scikit-Learn",
-                        "href": "https://github.com/Manzil777/Sentiment-Analysis",
+                        "href": "https://github.com/Aayush-Rasaily/Student-Feedback-System-Using-Sentimental-Analysis",
                         "shape": "project:sentiment-analysis",
                         "summary": "End-to-end NLP pipeline classifying 1,000+ student feedback entries with 88% accuracy and automated SMTP workflows."
                     },
                     {
                         "title": "SoleTrack",
                         "detail": "POS · PHP · MariaDB",
-                        "href": "https://github.com/Manzil777/SoleTrack",
+                        "href": "https://github.com/Manzil777/SHOE-INVENTORY-MANAGEMENT-SYSTEM-with-POS",
                         "shape": "project:soletrack",
                         "summary": "Lightweight retail footwear POS & inventory management system with role-based auth, SKU-level tracking, and stock analytics."
                     }
